@@ -1,0 +1,73 @@
+import React, { SetStateAction, useState } from 'react';
+import * as XLSX from 'xlsx';
+import { Button, Input, Table, TableBody, TableCell, TableRow } from '@mui/material';
+
+
+const Reference = () => {
+  const [data, setData] = useState([]);
+  const [error, setError] = useState('');
+ 
+
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+
+  const reader: any = new FileReader();
+  reader.onload = (e: { target: { result: any; }; }) => {
+  const fileData = e.target?.result;
+  const workbook = XLSX.read(fileData, { type: 'binary' });
+  const sheetName = workbook.SheetNames[0];
+  const worksheet = workbook.Sheets[sheetName];
+  const sheetData:SetStateAction<never[]>= XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false });
+
+  setData(sheetData);
+};
+  reader.readAsBinaryString(file);
+};
+  const handleSubmit = (e: { preventDefault: () => void; }) => {
+    e.preventDefault();
+    setError('');
+    
+
+    if (data.length === 0) {
+      setError('No Data');
+      return;
+    }
+
+    console.log(data);
+    setData([]);
+  };
+
+  return (
+    <div>
+      {error && <p style={{ color: 'red' ,justifyContent:"center"}}>{error}</p>}
+
+      <form onSubmit={handleSubmit}>
+  <label className='text'></label>
+ <Input
+          type="file"
+          inputProps={{ accept: '.xls,.xlsx' }}
+          onChange={handleFile}
+        />
+  <Button type='submit' variant='contained' className='submit-button'>Submit</Button>
+</form>
+
+<Table className="table-style">
+  <TableBody>
+    {data.map((row: (string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | React.ReactFragment | React.ReactPortal | null | undefined)[], i: number) => (
+      <TableRow key={i}>
+        {row.map((cell: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | React.ReactFragment | React.ReactPortal | null | undefined, j: number) => (
+          <TableCell key={`${i}-${j}`} className="table-cell-style">
+            {cell}
+          </TableCell>
+        ))}
+      </TableRow>
+    ))}
+  </TableBody>
+</Table>
+
+
+    </div>
+  );
+};
+
+export default Reference; 
